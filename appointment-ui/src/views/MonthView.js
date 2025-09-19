@@ -25,7 +25,10 @@ export default function MonthView() {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
 
-  useEffect(() => loadMonth(current), [current]);
+  // Add dependency on search to reload when search changes
+  useEffect(() => {
+    loadMonth(current);
+  }, [current, search]); // Added search as dependency
 
   async function loadMonth(d) {
     setLoading(true);
@@ -45,15 +48,21 @@ export default function MonthView() {
     }
   }
 
-  const handlePrevMonth = () => {
+  // Ensure these handlers are properly defined
+  const handlePrevMonth = (e) => {
+    e.preventDefault(); // Prevent default behavior
+    e.stopPropagation(); // Stop event propagation
     setCurrent(prevDate => subMonths(prevDate, 1));
   };
 
-  const handleNextMonth = () => {
+  const handleNextMonth = (e) => {
+    e.preventDefault(); // Prevent default behavior
+    e.stopPropagation(); // Stop event propagation
     setCurrent(prevDate => addMonths(prevDate, 1));
   };
 
-  const handleLogout = () => {
+  const handleLogout = (e) => {
+    e.preventDefault(); // Prevent default behavior
     if (logout) {
       logout();
       navigate("/");
@@ -64,7 +73,8 @@ export default function MonthView() {
     navigate(`/day?date=${date.toISOString().slice(0, 10)}`);
   };
 
-  const openNew = () => {
+  const openNew = (e) => {
+    e.preventDefault(); // Prevent default behavior
     // Navigate to day view with current date to create a new appointment
     navigate(`/day?date=${new Date().toISOString().slice(0, 10)}`);
   };
@@ -159,9 +169,10 @@ export default function MonthView() {
       <main className="gc-main">
         <div className="gc-main-header">
           <div className="date-navigation">
-            <button className="nav-button" onClick={handlePrevMonth}>←</button>
+            {/* Add type="button" to ensure they're treated as buttons */}
+            <button type="button" className="nav-button" onClick={handlePrevMonth}>←</button>
             <strong className="date-display">{format(current, "MMMM yyyy")}</strong>
-            <button className="nav-button" onClick={handleNextMonth}>→</button>
+            <button type="button" className="nav-button" onClick={handleNextMonth}>→</button>
             {loading && <small className="loading-indicator">Loading...</small>}
           </div>
           <div className="view-navigation">
@@ -169,13 +180,14 @@ export default function MonthView() {
             <Link to="/week" className="view-link">Week</Link>
             <Link to="/month" className="view-link active">Month</Link>
             <button 
+              type="button"
               className="theme-toggle" 
               onClick={toggleTheme} 
               aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
             >
               {theme === 'light' ? '🌙' : '☀️'}
             </button>
-            <button className="logout-button" onClick={handleLogout}>Logout</button>
+            <button type="button" className="logout-button" onClick={handleLogout}>Logout</button>
           </div>
         </div>
 

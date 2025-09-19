@@ -411,6 +411,88 @@ body {
   align-items: center;
 }
 
+/* ----------------- Base Navbar ----------------- */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: var(--bg-tertiary, #222);
+  color: var(--text-color, #fff);
+  position: relative;
+  z-index: 100;
+}
+
+.brand {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--text-color, #fff);
+  text-decoration: none;
+}
+
+/* ----------------- Desktop Menu ----------------- */
+.desktop-only {
+  display: flex;
+  gap: 12px;
+}
+
+/* ----------------- Hamburger Button ----------------- */
+.nav-button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--text-color, #fff);
+  display: none; /* hidden on desktop by default */
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  padding: 4px;
+}
+
+.nav-button:hover {
+  background-color: var(--bg-tertiary, #333);
+}
+
+/* ----------------- Mobile Menu ----------------- */
+.mobile-menu {
+  position: absolute;
+  top: 60px;
+  right: 10px;
+  background: var(--bg-tertiary, #333);
+  border-radius: 8px;
+  padding: 10px;
+  display: none; /* hidden by default */
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+/* ----------------- Optional Elements ----------------- */
+.date-display {
+  margin: 0 12px;
+  white-space: nowrap;
+}
+
+.loading-indicator {
+  margin-left: 8px;
+  color: var(--muted-color, #aaa);
+}
+
+/* ----------------- Responsive ----------------- */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .nav-button {
+    display: flex;
+  }
+}
+
+
 .date-display {
   margin: 0 12px;
   white-space: nowrap;
@@ -421,25 +503,7 @@ body {
   color: var(--muted-color);
 }
 
-.nav-button {
-  background: none;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 8px;
-  color: var(--text-color);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 4px;
-}
 
-.nav-button:hover {
-  background-color: var(--bg-tertiary);
-}
 
 .view-navigation {
   display: flex;
@@ -939,6 +1003,7 @@ body {
   flex: 1;
   border-right: 1px solid var(--border-color);
   min-width: 120px;
+  width: 100%;
   position: relative;
   background-color: var(--bg-color);
 }

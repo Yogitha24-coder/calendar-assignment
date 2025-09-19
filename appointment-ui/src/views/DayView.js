@@ -335,6 +335,37 @@ export default function DayView() {
 
   const currentTimePosition = getCurrentTimeIndicatorPosition();
 
+  // Theme-based styles for navigation buttons
+  const getNavButtonStyles = () => {
+    return {
+      padding: '8px 16px',
+      fontSize: '16px',
+      backgroundColor: theme === 'dark' ? '#333' : '#f8f9fa',
+      color: theme === 'dark' ? '#fff' : '#212529',
+      border: theme === 'dark' ? '1px solid #555' : '1px solid #dee2e6',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: theme === 'dark' ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.1)',
+      transition: 'all 0.2s ease',
+      minWidth: '40px',
+      minHeight: '40px'
+    };
+  };
+
+  // Theme-based styles for date display
+  const getDateDisplayStyles = () => {
+    return {
+      fontSize: '18px',
+      padding: '0 15px',
+      minWidth: '200px',
+      textAlign: 'center',
+      color: theme === 'dark' ? '#fff' : '#212529'
+    };
+  };
+
   return (
     <div className="gc-container">
       <aside className="gc-left">
@@ -367,11 +398,41 @@ export default function DayView() {
 
       <main className="gc-main">
         <div className="gc-main-header">
-          <div className="date-navigation">
-            <button className="nav-button" onClick={handlePrevDay}>←</button>
-            <strong className="date-display">{new Date(date).toDateString()}</strong>
-            <button className="nav-button" onClick={handleNextDay}>→</button>
-            {loading && <small className="loading-indicator">Loading...</small>}
+          {/* UPDATED DATE NAVIGATION SECTION WITH DARK MODE SUPPORT */}
+          <div className="date-navigation" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+            <button 
+              className="nav-button" 
+              onClick={handlePrevDay}
+              style={getNavButtonStyles()}
+              aria-label="Previous Day"
+            >
+              <span style={{ fontSize: '20px' }}>←</span>
+            </button>
+            <strong 
+              className="date-display"
+              style={getDateDisplayStyles()}
+            >
+              {new Date(date).toDateString()}
+            </strong>
+            <button 
+              className="nav-button" 
+              onClick={handleNextDay}
+              style={getNavButtonStyles()}
+              aria-label="Next Day"
+            >
+              <span style={{ fontSize: '20px' }}>→</span>
+            </button>
+            {loading && (
+              <small 
+                className="loading-indicator"
+                style={{
+                  marginLeft: '10px',
+                  color: theme === 'dark' ? '#adb5bd' : '#6c757d'
+                }}
+              >
+                Loading...
+              </small>
+            )}
           </div>
           <div className="view-navigation">
             <Link to="/day" className="view-link active">Day</Link>

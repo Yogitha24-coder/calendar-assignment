@@ -1,0 +1,114 @@
+/* Additional responsive styles for calendar views */
+
+/* Week view responsive adjustments */
+@media (max-width: 767px) {
+  .week-grid {
+    overflow-x: auto;
+    min-width: 700px; /* Ensure minimum width for scrolling */
+  }
+  
+  .week-time-column {
+    position: sticky;
+    left: 0;
+    background-color: var(--bg-color, #fff);
+    z-index: 10;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .week-column {
+    min-width: 90px;
+  }
+  
+  .week-event-title {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .week-event-time {
+    font-size: 0.7rem;
+  }
+}
+
+/* Month view responsive adjustments */
+@media (max-width: 767px) {
+  .month-grid {
+    font-size: 0.8rem;
+  }
+  
+  .month-cell {
+    min-height: 80px;
+  }
+  
+  .month-event {
+    padding: 2px 4px;
+    margin-bottom: 2px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Day view responsive adjustments */
+@media (max-width: 767px) {
+  .gc-time-col {
+    width: 60px;
+    font-size: 0.8rem;
+  }
+  
+  .gc-appointment {
+    font-size: 0.8rem;
+  }
+  
+  .gc-appointment-title {
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Make form modal take full width on mobile */
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+}
+
+/* General responsive adjustments */
+@media (max-width: 767px) {
+  .gc-main-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .date-navigation {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .view-navigation {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .date-display {
+    font-size: 1rem;
+  }
+  
+  .nav-button {
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .view-link {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .theme-toggle, .logout-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.9rem;
+  }
+}
