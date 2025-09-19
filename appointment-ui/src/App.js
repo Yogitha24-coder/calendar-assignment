@@ -5,6 +5,7 @@ import WeekView from './views/WeekView';
 import MonthView from './views/MonthView';
 // Fix the import path - import from root src directory, not views
 import Login from './Login'; // Changed from './views/Login'
+import Register from './Register'; // Added import for Register component
 import { AuthProvider } from './AuthContext';
 import './Appointments.css';
 
@@ -105,6 +106,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<Login />} />
+            <Route path="/register" element={<Register />} /> {/* Added Register route */}
             <Route path="/day" element={<DayView />} />
             <Route path="/week" element={<WeekView />} />
             <Route path="/month" element={<MonthView />} />
