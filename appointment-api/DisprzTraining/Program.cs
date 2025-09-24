@@ -1,4 +1,5 @@
 ﻿using DisprzTraining.Data;
+using DisprzTraining.Services; // Added this line for AppointmentService
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -49,6 +50,9 @@ builder.Services.AddSwaggerGen(c =>
 // ✅ Register DbContext with SQL Server
 builder.Services.AddDbContext<AppointmentsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// ✅ Register AppointmentService - Added this line
+builder.Services.AddScoped<AppointmentService>();
 
 // ✅ JWT Authentication
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);

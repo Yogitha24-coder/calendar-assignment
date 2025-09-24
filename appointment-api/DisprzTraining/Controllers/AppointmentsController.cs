@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using DisprzTraining.Data;
 using DisprzTraining.Models;
 using DisprzTraining.DTOs;
+using DisprzTraining.Services;
 using System.Security.Claims;
 
 namespace DisprzTraining.Controllers
@@ -14,10 +15,12 @@ namespace DisprzTraining.Controllers
     public class AppointmentsController : ControllerBase
     {
         private readonly AppointmentsContext _context;
+        private readonly AppointmentService _appointmentService;
 
-        public AppointmentsController(AppointmentsContext context)
+        public AppointmentsController(AppointmentsContext context, AppointmentService appointmentService)
         {
             _context = context;
+            _appointmentService = appointmentService;
         }
 
         // Helper to read userId claim
@@ -32,17 +35,28 @@ namespace DisprzTraining.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointments([FromQuery] DateTime? date)
         {
-            var userId = GetUserId();
-            var query = _context.Appointments.Where(a => a.UserId == userId);
-
-            if (date.HasValue)
+            try
             {
-                // date-only comparison
-                query = query.Where(a => a.Date.Date == date.Value.Date);
+                var userId = GetUserId();
+                
+                if (date.HasValue)
+                {
+                    // Use the service to get appointments by date and user
+                    var appointments = await _appointmentService.GetAppointmentsByUserAndDateAsync(userId, date.Value);
+                    return Ok(appointments);
+                }
+                else
+                {
+                    // Fall back to the existing implementation for now
+                    var query = _context.Appointments.Where(a => a.UserId == userId);
+                    var list = await query.ToListAsync();
+                    return Ok(list);
+                }
             }
-
-            var list = await query.ToListAsync();
-            return Ok(list);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error retrieving appointments: {ex.Message}" });
+            }
         }
 
         // GET /appointments/{id}
@@ -67,34 +81,32 @@ namespace DisprzTraining.Controllers
 
             var userId = GetUserId();
 
-            // server-side conflict detection: overlapping times (allow end == other.start)
-            var conflict = await _context.Appointments
-                .AnyAsync(a => a.UserId == userId
-                               && a.Date.Date == dto.Date.Date
-                               && dto.StartTime < a.EndTime
-                               && dto.EndTime > a.StartTime);
-
-            if (conflict)
+            try
             {
-                return BadRequest(new { message = "This time conflicts with another appointment." });
+                var appointment = new Appointment
+                {
+                    Title = dto.Title,
+                    Description = dto.Description,
+                    Date = dto.Date.Date,
+                    StartTime = dto.StartTime,
+                    EndTime = dto.EndTime,
+                    UserId = userId,
+                    Attendees = dto.Attendees,
+                    Color = dto.Color
+                };
+
+                // Use the service to create the appointment
+                var createdAppointment = await _appointmentService.CreateAppointmentAsync(appointment);
+                return CreatedAtAction(nameof(GetAppointment), new { id = createdAppointment.Id }, createdAppointment);
             }
-
-            var appointment = new Appointment
+            catch (InvalidOperationException ex)
             {
-                Title = dto.Title,
-                Description = dto.Description,
-                Date = dto.Date.Date,
-                StartTime = dto.StartTime,
-                EndTime = dto.EndTime,
-                UserId = userId,
-                Attendees = dto.Attendees,
-                Color = dto.Color
-            };
-
-            _context.Appointments.Add(appointment);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetAppointment), new { id = appointment.Id }, appointment);
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error creating appointment: {ex.Message}" });
+            }
         }
 
         // PUT /appointments/{id}
@@ -106,49 +118,59 @@ namespace DisprzTraining.Controllers
             if (dto.EndTime <= dto.StartTime)
                 return BadRequest(new { message = "EndTime must be later than StartTime" });
 
-            var appointment = await _context.Appointments.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
-            if (appointment == null) return NotFound(new { message = $"Appointment {id} not found for this user" });
+            try
+            {
+                var appointment = new Appointment
+                {
+                    Id = id,
+                    Title = dto.Title,
+                    Description = dto.Description,
+                    Date = dto.Date.Date,
+                    StartTime = dto.StartTime,
+                    EndTime = dto.EndTime,
+                    UserId = userId,
+                    Attendees = dto.Attendees,
+                    Color = dto.Color
+                };
 
-            // conflict check excluding current appointment
-            var conflict = await _context.Appointments
-                .AnyAsync(a => a.UserId == userId
-                               && a.Id != id
-                               && a.Date.Date == dto.Date.Date
-                               && dto.StartTime < a.EndTime
-                               && dto.EndTime > a.StartTime);
-
-            if (conflict)
-                return BadRequest(new { message = "This time conflicts with another appointment." });
-
-            appointment.Title = dto.Title;
-            appointment.Description = dto.Description;
-            appointment.Date = dto.Date.Date;
-            appointment.StartTime = dto.StartTime;
-            appointment.EndTime = dto.EndTime;
-            appointment.Attendees = dto.Attendees;
-            appointment.Color = dto.Color;
-
-            _context.Entry(appointment).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+                // Use the service to update the appointment
+                await _appointmentService.UpdateAppointmentAsync(appointment);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(new { message = $"Appointment {id} not found for this user" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error updating appointment: {ex.Message}" });
+            }
         }
 
         // DELETE /appointments/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppointment(int id)
         {
-            var userId = GetUserId();
-
-            var appointment = await _context.Appointments.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
-            if (appointment == null) return NotFound(new { message = $"Appointment {id} not found for this user" });
-
-            _context.Appointments.Remove(appointment);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = $"Appointment {id} deleted" });
+            try
+            {
+                var result = await _appointmentService.DeleteAppointmentAsync(id);
+                if (result)
+                {
+                    return Ok(new { message = $"Appointment {id} deleted" });
+                }
+                else
+                {
+                    return NotFound(new { message = $"Appointment {id} not found for this user" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error deleting appointment: {ex.Message}" });
+            }
         }
-
-
     }
 }
